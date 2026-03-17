@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ActBayan — Login / Register</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+
+        :root {
+            --bg-main: #f4f6f8;
+            --bg-card: #ffffff;
+            --text-main: #202124;
+            --text-muted: #5f6368;
+            --border-color: #e0e0e0;
+            --search-bg: #f1f3f4;
+            --red: #8b0000;
+            --red-hover: #a30000;
+            --red-light: rgba(139,0,0,0.08);
+        }
+
+        body.dark-mode {
+            --bg-main: #121212;
+            --bg-card: #1e1e1e;
+            --text-main: #e8eaed;
+            --text-muted: #9aa0a6;
+            --border-color: #333333;
+            --search-bg: #2a2a2a;
+            --red-light: rgba(139,0,0,0.15);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background-color 0.3s, color 0.3s;
+            overflow-x: hidden;
+        }
+
+        /* ===== SPLIT LAYOUT ===== */
+        .auth-wrapper {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: 100vh;
+        }
+
+        /* ===== LEFT PANEL ===== */
+        .left-panel {
+            position: relative;
+            background: linear-gradient(155deg, #6b0000 0%, #8b0000 40%, #b91c1c 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 48px 52px;
+            overflow: hidden;
+        }
+
+        /* Decorative circles */
+        .left-panel::before {
+            content: '';
+            position: absolute;
+            width: 480px; height: 480px;
+            border-radius: 50%;
+            border: 80px solid rgba(255,255,255,0.05);
+            top: -140px; left: -140px;
+            pointer-events: none;
+        }
+        .left-panel::after {
+            content: '';
+            position: absolute;
+            width: 320px; height: 320px;
+            border-radius: 50%;
+            border: 55px solid rgba(255,255,255,0.05);
+            bottom: -90px; right: -90px;
+            pointer-events: none;
+        }
+
+        .left-deco-dot {
+            position: absolute;
+            width: 160px; height: 160px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.06);
+            bottom: 160px; left: -50px;
+            pointer-events: none;
+        }
+
+        .left-logo {
+            font-size: 26px;
+            font-weight: 900;
+            color: white;
+            letter-spacing: -0.5px;
+            position: relative;
+            z-index: 1;
+            text-decoration: none;
+        }
+        .left-logo span { color: rgba(255,255,255,0.5); }
+
+        .left-hero {
+            position: relative;
+            z-index: 1;
+        }
+
+        .left-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 50px;
+            padding: 6px 14px;
+            font-size: 12px;
+            font-weight: 700;
+            color: rgba(255,255,255,0.9);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 22px;
+        }
+        .left-badge i { font-size: 10px; }
+
+        .left-headline {
+            font-size: 40px;
+            font-weight: 900;
+            color: white;
+            line-height: 1.12;
+            letter-spacing: -1.5px;
+            margin-bottom: 18px;
+        }
+        .left-headline em {
+            font-style: normal;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .left-sub {
+            font-size: 15px;
+            color: rgba(255,255,255,0.75);
+            line-height: 1.65;
+            max-width: 340px;
+            margin-bottom: 36px;
+        }
+
+        .left-stats {
+            display: flex;
+            gap: 28px;
+            flex-wrap: wrap;
+        }
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .stat-num {
+            font-size: 26px;
+            font-weight: 900;
+            color: white;
+            letter-spacing: -1px;
+        }
+        .stat-label {
+            font-size: 11px;
+            color: rgba(255,255,255,0.6);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .left-footer-text {
+            font-size: 12px;
+            color: rgba(255,255,255,0.4);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ===== RIGHT PANEL ===== */
+        .right-panel {
+            background-color: var(--bg-card);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 48px 60px;
+            position: relative;
+            transition: background-color 0.3s;
+        }
+
+        .theme-btn {
+            position: absolute;
+            top: 24px; right: 24px;
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            border: 1.5px solid var(--border-color);
+            background: var(--search-bg);
+            color: var(--text-muted);
+            font-size: 15px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .theme-btn:hover { border-color: var(--red); color: var(--red); }
+
+        .back-link {
+            position: absolute;
+            top: 24px; left: 24px;
+            font-size: 13px; font-weight: 700;
+            color: var(--text-muted);
+            text-decoration: none;
+            display: flex; align-items: center; gap: 6px;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: var(--red); }
+
+        .auth-box {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        /* ===== TAB SWITCHER ===== */
+        .tab-switcher {
+            display: flex;
+            background: var(--search-bg);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 32px;
+            transition: background 0.3s;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 9px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.25s;
+            background: transparent;
+            color: var(--text-muted);
+        }
+        .tab-btn.active {
+            background: var(--red);
+            color: white;
+            box-shadow: 0 4px 14px rgba(139,0,0,0.3);
+        }
+
+        /* ===== FORM PANELS ===== */
+        .form-panel { display: none; }
+        .form-panel.active { display: block; }
+
+        .form-title {
+            font-size: 26px;
+            font-weight: 900;
+            color: var(--text-main);
+            letter-spacing: -0.8px;
+            margin-bottom: 4px;
+            transition: color 0.3s;
+        }
+        .form-subtitle {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 28px;
+            line-height: 1.5;
+        }
+        .form-subtitle a {
+            color: var(--red);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        /* ===== FORM FIELDS ===== */
+        .form-group { margin-bottom: 16px; }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 7px;
+            transition: color 0.3s;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+        .input-wrap i.input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 13px;
+            color: var(--text-muted);
+            pointer-events: none;
+            transition: color 0.2s;
+        }
+        .input-wrap input,
+        .input-wrap select {
+            width: 100%;
+            padding: 11px 14px 11px 38px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 11px;
+            font-size: 14px;
+            background: var(--bg-main);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.3s, color 0.3s;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        .input-wrap input:focus,
+        .input-wrap select:focus {
+            border-color: var(--red);
+            box-shadow: 0 0 0 3px var(--red-light);
+        }
+        .input-wrap input:focus ~ i.input-icon,
+        .input-wrap input:focus + i.input-icon { color: var(--red); }
+        .input-wrap .toggle-pw {
+            position: absolute;
+            right: 13px; top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: color 0.2s;
+            pointer-events: auto;
+        }
+        .input-wrap .toggle-pw:hover { color: var(--red); }
+
+        /* Two-col row */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        /* ===== PASSWORD STRENGTH ===== */
+        .pw-strength {
+            margin-top: 7px;
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+        .pw-bar {
+            flex: 1; height: 4px; border-radius: 2px;
+            background: var(--border-color);
+            transition: background 0.3s;
+        }
+        .pw-label {
+            font-size: 11px; font-weight: 700;
+            color: var(--text-muted); min-width: 44px;
+            text-align: right; transition: color 0.3s;
+        }
+
+        /* ===== OPTIONS ROW ===== */
+        .options-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .remember-wrap {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 13px; font-weight: 600; color: var(--text-muted);
+            cursor: pointer; user-select: none;
+        }
+        .remember-wrap input[type="checkbox"] {
+            appearance: none; -webkit-appearance: none;
+            width: 17px; height: 17px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 5px; cursor: pointer;
+            background: var(--bg-main);
+            transition: all 0.2s;
+            position: relative;
+        }
+        .remember-wrap input[type="checkbox"]:checked {
+            background: var(--red); border-color: var(--red);
+        }
+        .remember-wrap input[type="checkbox"]:checked::after {
+            content: '';
+            position: absolute; left: 4px; top: 1px;
+            width: 5px; height: 9px;
+            border: 2px solid white; border-top: none; border-left: none;
+            transform: rotate(45deg);
+        }
+        .forgot-link {
+            font-size: 13px; font-weight: 700;
+            color: var(--red); text-decoration: none;
+            transition: color 0.2s;
+        }
+        .forgot-link:hover { color: var(--red-hover); }
+
+        /* ===== SUBMIT BTN ===== */
+        .submit-btn {
+            width: 100%;
+            padding: 13px;
+            background: var(--red);
+            color: white;
+            border: none; border-radius: 50px;
+            font-size: 15px; font-weight: 700;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            box-shadow: 0 4px 14px rgba(139,0,0,0.25);
+        }
+        .submit-btn:hover {
+            background: var(--red-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(139,0,0,0.35);
+        }
+        .submit-btn:active { transform: translateY(0); }
+
+        /* ===== DIVIDER ===== */
+        .divider {
+            display: flex; align-items: center; gap: 12px;
+            margin: 22px 0;
+            font-size: 12px; font-weight: 700; color: var(--text-muted);
+        }
+        .divider::before, .divider::after {
+            content: ''; flex: 1;
+            height: 1px; background: var(--border-color);
+        }
+
+        /* ===== SOCIAL BTNS ===== */
+        .social-row { display: flex; gap: 10px; }
+        .social-btn {
+            flex: 1; padding: 10px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 11px;
+            background: var(--bg-main);
+            color: var(--text-main);
+            font-size: 13px; font-weight: 700;
+            cursor: pointer; font-family: 'Inter', sans-serif;
+            display: flex; align-items: center; justify-content: center; gap: 7px;
+            transition: all 0.2s;
+        }
+        .social-btn:hover { border-color: var(--red); color: var(--red); background: var(--red-light); }
+        .social-btn i { font-size: 15px; }
+
+        /* ===== TERMS CHECKBOX ===== */
+        .terms-wrap {
+            display: flex; align-items: flex-start; gap: 9px;
+            margin-bottom: 18px;
+            font-size: 13px; color: var(--text-muted); line-height: 1.5;
+        }
+        .terms-wrap input[type="checkbox"] {
+            appearance: none; -webkit-appearance: none;
+            width: 17px; height: 17px; flex-shrink: 0;
+            border: 1.5px solid var(--border-color);
+            border-radius: 5px; cursor: pointer;
+            background: var(--bg-main);
+            transition: all 0.2s; margin-top: 1px;
+            position: relative;
+        }
+        .terms-wrap input[type="checkbox"]:checked {
+            background: var(--red); border-color: var(--red);
+        }
+        .terms-wrap input[type="checkbox"]:checked::after {
+            content: '';
+            position: absolute; left: 4px; top: 1px;
+            width: 5px; height: 9px;
+            border: 2px solid white; border-top: none; border-left: none;
+            transform: rotate(45deg);
+        }
+        .terms-wrap a { color: var(--red); font-weight: 700; text-decoration: none; }
+
+        /* ===== TOAST ===== */
+        .toast-container {
+            position: fixed; bottom: 28px; left: 50%;
+            transform: translateX(-50%); z-index: 9998;
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
+            pointer-events: none;
+        }
+        .toast {
+            background-color: #1e1e1e; color: #fff;
+            padding: 11px 22px; border-radius: 50px;
+            font-size: 14px; font-weight: 600;
+            display: flex; align-items: center; gap: 9px;
+            opacity: 0; transform: translateY(18px);
+            transition: all 0.35s cubic-bezier(0.34,1.5,0.64,1);
+            pointer-events: auto; white-space: nowrap;
+        }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .toast.success i { color: #22c55e; }
+        .toast.info i { color: #60a5fa; }
+        .toast.error i { color: #f87171; }
+        body.dark-mode .toast { background-color: #e8eaed; color: #202124; }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 860px) {
+            .auth-wrapper { grid-template-columns: 1fr; }
+            .left-panel { display: none; }
+            .right-panel { padding: 48px 28px; min-height: 100vh; }
+        }
+        @media (max-width: 420px) {
+            .form-row { grid-template-columns: 1fr; }
+            .right-panel { padding: 48px 18px; }
+        }
+
+        /* ===== ANIMATIONS ===== */
+        .auth-box {
+            animation: fadeUp 0.45s cubic-bezier(0.34,1.2,0.64,1) both;
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .form-panel.active {
+            animation: panelIn 0.3s ease both;
+        }
+        @keyframes panelIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* OTP / Forgot modal */
+        .mini-modal-backdrop {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 800;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+            padding: 20px;
+        }
+        .mini-modal-backdrop.open { opacity: 1; visibility: visible; }
+        .mini-modal {
+            background: var(--bg-card);
+            border-radius: 18px;
+            padding: 28px 30px;
+            max-width: 360px; width: 100%;
+            transform: scale(0.92);
+            transition: transform 0.3s cubic-bezier(0.34,1.3,0.64,1);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+        .mini-modal-backdrop.open .mini-modal { transform: scale(1); }
+        .mini-modal h3 { font-size: 18px; font-weight: 800; margin-bottom: 8px; color: var(--text-main); }
+        .mini-modal p { font-size: 13px; color: var(--text-muted); margin-bottom: 18px; line-height: 1.6; }
+        .mini-modal-close {
+            float: right; background: var(--search-bg); border: none;
+            width: 30px; height: 30px; border-radius: 50%;
+            cursor: pointer; color: var(--text-muted); font-size: 13px;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s, color 0.2s;
+        }
+        .mini-modal-close:hover { background: var(--red); color: white; }
+    </style>
+</head>
+<body>
+
+<div class="toast-container" id="toast-container"></div>
+
+<!-- Forgot Password Mini Modal -->
+<div class="mini-modal-backdrop" id="forgot-modal">
+    <div class="mini-modal">
+        <button class="mini-modal-close" onclick="closeForgot()"><i class="fas fa-times"></i></button>
+        <h3>Reset Password</h3>
+        <p>Enter your registered email or phone number and we'll send you a reset link.</p>
+        <div class="form-group">
+            <label>Email or Phone</label>
+            <div class="input-wrap">
+                <i class="fas fa-envelope input-icon"></i>
+                <input type="text" placeholder="email@example.com">
+            </div>
+        </div>
+        <button class="submit-btn" onclick="sendReset()" style="margin-top:6px;">
+            <i class="fas fa-paper-plane"></i> Send Reset Link
+        </button>
+    </div>
+</div>
+
+<div class="auth-wrapper">
+
+    <!-- ===== LEFT PANEL ===== -->
+    <div class="left-panel">
+        <div class="left-deco-dot"></div>
+        <a href="home.html" class="left-logo">ActBayan<span>.</span></a>
+
+        <div class="left-hero">
+            <div class="left-badge">
+                <i class="fas fa-shield-alt"></i> Secure Community Portal
+            </div>
+            <div class="left-headline">
+                Your Voice,<br><em>Heard</em> Here.
+            </div>
+            <p class="left-sub">
+                Login or register to submit concerns, view resolutions,
+                and stay updated on all news from Barangay Picaleon.
+            </p>
+            <div class="left-stats">
+                <div class="stat-item">
+                    <span class="stat-num">84</span>
+                    <span class="stat-label">Resolved this month</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-num">1.2k</span>
+                    <span class="stat-label">Registered residents</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-num">3</span>
+                    <span class="stat-label">New announcements</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="left-footer-text">
+            © 2026 ActBayan — Barangay Picaleon, General Mamerto Natividad, Nueva Ecija
+        </div>
+    </div>
+
+    <!-- ===== RIGHT PANEL ===== -->
+    <div class="right-panel">
+        <a href="home.html" class="back-link">
+            <i class="fas fa-arrow-left"></i> Back to Portal
+        </a>
+
+        <button class="theme-btn" id="theme-btn" title="Toggle Dark Mode">
+            <i class="fas fa-moon" id="theme-icon"></i>
+        </button>
+
+        <div class="auth-box">
+            <!-- TAB SWITCHER -->
+            <div class="tab-switcher">
+                <button class="tab-btn active" id="tab-login" onclick="switchTab('login')">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+                <button class="tab-btn" id="tab-register" onclick="switchTab('register')">
+                    <i class="fas fa-user-plus"></i> Register
+                </button>
+            </div>
+
+            <!-- ===== LOGIN FORM ===== -->
+            <div class="form-panel active" id="panel-login">
+                <div class="form-title">Welcome Back 👋</div>
+                <p class="form-subtitle">Don't have an account? <a href="#" onclick="switchTab('register')">Register here</a></p>
+
+                <div class="form-group">
+                    <label>Email or Phone Number</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-user input-icon"></i>
+                        <input type="text" id="login-email" placeholder="email@example.com">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Password</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-lock input-icon"></i>
+                        <input type="password" id="login-pw" placeholder="••••••••">
+                        <i class="fas fa-eye toggle-pw" onclick="togglePw('login-pw', this)"></i>
+                    </div>
+                </div>
+
+                <div class="options-row">
+                    <label class="remember-wrap">
+                        <input type="checkbox"> Remember me
+                    </label>
+                    <a href="#" class="forgot-link" onclick="openForgot()">Forgot password?</a>
+                </div>
+
+                <button class="submit-btn" onclick="doLogin()">
+                    <i class="fas fa-sign-in-alt"></i> Login to ActBayan
+                </button>
+
+                <div class="divider">or continue with</div>
+
+                <div class="social-row">
+                    <button class="social-btn" onclick="showToast('Google login coming soon', 'info')">
+                        <i class="fab fa-google" style="color:#EA4335;"></i> Google
+                    </button>
+                    <button class="social-btn" onclick="showToast('Facebook login coming soon', 'info')">
+                        <i class="fab fa-facebook-f" style="color:#1877F2;"></i> Facebook
+                    </button>
+                </div>
+            </div>
+
+            <!-- ===== REGISTER FORM ===== -->
+            <div class="form-panel" id="panel-register">
+                <div class="form-title">Join ActBayan ✨</div>
+                <p class="form-subtitle">Already have an account? <a href="#" onclick="switchTab('login')">Login here</a></p>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>First Name</label>
+                        <div class="input-wrap">
+                            <i class="fas fa-user input-icon"></i>
+                            <input type="text" id="reg-fname" placeholder="Juan">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name</label>
+                        <div class="input-wrap">
+                            <i class="fas fa-user input-icon"></i>
+                            <input type="text" id="reg-lname" placeholder="dela Cruz">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-envelope input-icon"></i>
+                        <input type="email" id="reg-email" placeholder="juan@example.com">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-phone input-icon"></i>
+                        <input type="tel" id="reg-phone" placeholder="09XX XXX XXXX">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Purok / Address</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-map-marker-alt input-icon"></i>
+                        <select id="reg-purok">
+                            <option value="">Select your purok...</option>
+                            <option>Purok 1 — Picaleon</option>
+                            <option>Purok 2 — Picaleon</option>
+                            <option>Purok 3 — Picaleon</option>
+                            <option>Purok 4 — Picaleon</option>
+                            <option>Purok 5 — Picaleon</option>
+                            <option>Purok 6 — Picaleon</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Password</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-lock input-icon"></i>
+                        <input type="password" id="reg-pw" placeholder="Min. 8 characters" oninput="checkStrength(this.value)">
+                        <i class="fas fa-eye toggle-pw" onclick="togglePw('reg-pw', this)"></i>
+                    </div>
+                    <div class="pw-strength">
+                        <div class="pw-bar" id="bar1"></div>
+                        <div class="pw-bar" id="bar2"></div>
+                        <div class="pw-bar" id="bar3"></div>
+                        <div class="pw-bar" id="bar4"></div>
+                        <span class="pw-label" id="pw-label">—</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Confirm Password</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-lock input-icon"></i>
+                        <input type="password" id="reg-pw2" placeholder="Repeat password">
+                        <i class="fas fa-eye toggle-pw" onclick="togglePw('reg-pw2', this)"></i>
+                    </div>
+                </div>
+
+                <div class="terms-wrap">
+                    <input type="checkbox" id="terms-check">
+                    <label for="terms-check">
+                        I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a> of ActBayan and Barangay Picaleon.
+                    </label>
+                </div>
+
+                <button class="submit-btn" onclick="doRegister()">
+                    <i class="fas fa-user-plus"></i> Create My Account
+                </button>
+
+                <div class="divider">or sign up with</div>
+
+                <div class="social-row">
+                    <button class="social-btn" onclick="showToast('Google signup coming soon', 'info')">
+                        <i class="fab fa-google" style="color:#EA4335;"></i> Google
+                    </button>
+                    <button class="social-btn" onclick="showToast('Facebook signup coming soon', 'info')">
+                        <i class="fab fa-facebook-f" style="color:#1877F2;"></i> Facebook
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    // ===== DARK MODE =====
+    const body = document.body;
+    const themeBtn = document.getElementById('theme-btn');
+    const themeIcon = document.getElementById('theme-icon');
+
+    if (localStorage.getItem('theme') === 'dark') {
+        body.classList.add('dark-mode');
+        themeIcon.classList.replace('fa-moon', 'fa-sun');
+    }
+    themeBtn.addEventListener('click', () => {
+        body.classList.toggle('dark-mode');
+        const isDark = body.classList.contains('dark-mode');
+        themeIcon.classList.replace(isDark ? 'fa-moon' : 'fa-sun', isDark ? 'fa-sun' : 'fa-moon');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    });
+
+    // ===== TAB SWITCH =====
+    function switchTab(tab) {
+        document.getElementById('panel-login').classList.toggle('active', tab === 'login');
+        document.getElementById('panel-register').classList.toggle('active', tab === 'register');
+        document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+        document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+    }
+
+    // ===== TOGGLE PASSWORD =====
+    function togglePw(id, icon) {
+        const input = document.getElementById(id);
+        const isText = input.type === 'text';
+        input.type = isText ? 'password' : 'text';
+        icon.className = 'fas toggle-pw ' + (isText ? 'fa-eye' : 'fa-eye-slash');
+    }
+
+    // ===== PASSWORD STRENGTH =====
+    function checkStrength(val) {
+        let score = 0;
+        if (val.length >= 8) score++;
+        if (/[A-Z]/.test(val)) score++;
+        if (/[0-9]/.test(val)) score++;
+        if (/[^A-Za-z0-9]/.test(val)) score++;
+
+        const colors = ['#ef4444', '#f97316', '#eab308', '#22c55e'];
+        const labels = ['Weak', 'Fair', 'Good', 'Strong'];
+        const bars = ['bar1','bar2','bar3','bar4'];
+
+        bars.forEach((id, i) => {
+            document.getElementById(id).style.background = i < score ? colors[score - 1] : '';
+        });
+        const lbl = document.getElementById('pw-label');
+        lbl.textContent = val.length === 0 ? '—' : labels[score - 1] || 'Weak';
+        lbl.style.color = val.length === 0 ? '' : colors[score - 1];
+    }
+
+    // ===== TOAST =====
+    function showToast(msg, type = 'info') {
+        const iconMap = { success: 'fa-check-circle', info: 'fa-info-circle', error: 'fa-exclamation-circle' };
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = 'toast ' + type;
+        toast.innerHTML = '<i class="fas ' + (iconMap[type] || 'fa-info-circle') + '"></i> ' + msg;
+        container.appendChild(toast);
+        requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add('show')));
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 400);
+        }, 3500);
+    }
+
+    // ===== LOGIN =====
+    function doLogin() {
+        const email = document.getElementById('login-email').value.trim();
+        const pw = document.getElementById('login-pw').value;
+        if (!email || !pw) { showToast('Please fill in all fields.', 'error'); return; }
+        showToast('Logging in...', 'info');
+        setTimeout(() => {
+            showToast('Welcome back! Redirecting...', 'success');
+            setTimeout(() => { window.location.href = 'home.html'; }, 1200);
+        }, 1200);
+    }
+
+    // ===== REGISTER =====
+    function doRegister() {
+        const fname = document.getElementById('reg-fname').value.trim();
+        const lname = document.getElementById('reg-lname').value.trim();
+        const email = document.getElementById('reg-email').value.trim();
+        const phone = document.getElementById('reg-phone').value.trim();
+        const purok = document.getElementById('reg-purok').value;
+        const pw    = document.getElementById('reg-pw').value;
+        const pw2   = document.getElementById('reg-pw2').value;
+        const terms = document.getElementById('terms-check').checked;
+
+        if (!fname || !lname || !email || !phone || !purok || !pw || !pw2) {
+            showToast('Please fill in all fields.', 'error'); return;
+        }
+        if (pw !== pw2) { showToast('Passwords do not match.', 'error'); return; }
+        if (pw.length < 8) { showToast('Password must be at least 8 characters.', 'error'); return; }
+        if (!terms) { showToast('Please accept the Terms of Service first.', 'error'); return; }
+
+        showToast('Creating your account...', 'info');
+        setTimeout(() => {
+            showToast('Account created! Welcome, ' + fname + '! 🎉', 'success');
+            setTimeout(() => { window.location.href = 'home.html'; }, 1400);
+        }, 1400);
+    }
+
+    // ===== FORGOT PASSWORD =====
+    function openForgot() { document.getElementById('forgot-modal').classList.add('open'); }
+    function closeForgot() { document.getElementById('forgot-modal').classList.remove('open'); }
+    function sendReset() {
+        closeForgot();
+        showToast('Reset link sent! Check your email.', 'success');
+    }
+
+    document.getElementById('forgot-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeForgot();
+    });
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeForgot();
+    });
+</script>
+</body>
+</html>
