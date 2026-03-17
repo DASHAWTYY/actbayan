@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ActBayan — Concerns</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+
+        :root {
+            --bg-main: #f4f6f8;
+            --bg-nav-card: #ffffff;
+            --text-main: #202124;
+            --text-muted: #5f6368;
+            --border-color: #e0e0e0;
+            --icon-hover: #e0e0e0;
+            --search-bg: #f1f3f4;
+            --red: #8b0000;
+            --red-hover: #a30000;
+            --red-light: rgba(139,0,0,0.08);
+        }
+
+        body.dark-mode {
+            --bg-main: #121212;
+            --bg-nav-card: #1e1e1e;
+            --text-main: #e8eaed;
+            --text-muted: #9aa0a6;
+            --border-color: #333333;
+            --icon-hover: #333333;
+            --search-bg: #2a2a2a;
+            --red-light: rgba(139,0,0,0.15);
+        }
+
+        body.dark-mode .toast { background-color: #e8eaed; color: #202124; }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            transition: background-color 0.3s, color 0.3s;
+            overflow-x: hidden;
+        }
+
+        /* ===== TOP NAV ===== */
+        .top-nav {
+            background-color: var(--bg-nav-card);
+            padding: 13px 50px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            position: sticky; top: 0; z-index: 100;
+            transition: background-color 0.3s; gap: 20px;
+        }
+        .nav-left { display: flex; align-items: center; gap: 16px; flex: 1; min-width: 0; }
+        .nav-logo { font-weight: 900; font-size: 20px; color: var(--text-main); white-space: nowrap; cursor: pointer; text-decoration: none; }
+        .nav-logo span { color: var(--red); }
+        .breadcrumb { display: flex; align-items: center; gap: 5px; font-size: 13px; color: var(--text-muted); }
+        .breadcrumb a { color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
+        .breadcrumb a:hover { color: var(--red); }
+        .breadcrumb .current { color: var(--text-main); font-weight: 600; }
+
+        .nav-search {
+            display: flex; align-items: center;
+            background-color: var(--search-bg);
+            border-radius: 50px; padding: 8px 16px; gap: 8px;
+            flex: 1; max-width: 300px;
+            border: 1.5px solid transparent;
+            transition: background-color 0.3s, box-shadow 0.2s;
+        }
+        .nav-search:focus-within { border-color: var(--red); box-shadow: 0 0 0 3px var(--red-light); }
+        .nav-search i { color: var(--text-muted); font-size: 13px; }
+        .nav-search input {
+            background: transparent; border: none; outline: none;
+            font-size: 14px; color: var(--text-main); font-family: 'Inter', sans-serif; width: 100%;
+        }
+        .nav-search input::placeholder { color: var(--text-muted); }
+
+        .nav-icons { display: flex; gap: 6px; align-items: center; }
+        .nav-icon-btn {
+            position: relative; display: flex; align-items: center; justify-content: center;
+            width: 40px; height: 40px; border-radius: 50%; cursor: pointer; transition: background-color 0.2s;
+        }
+        .nav-icon-btn:hover { background-color: var(--icon-hover); }
+        .nav-icon-btn i { font-size: 20px; color: var(--text-muted); transition: color 0.2s; }
+        .nav-icon-btn:hover i, .nav-icon-btn.active i { color: var(--red); }
+        .notif-badge {
+            position: absolute; top: 4px; right: 4px;
+            background-color: #cc0000; color: white; font-size: 9px; font-weight: 800;
+            width: 15px; height: 15px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            border: 2px solid var(--bg-nav-card);
+        }
+        #theme-toggle-btn {
+            width: 40px; height: 40px; border-radius: 50%;
+            background-color: var(--icon-hover);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: background 0.3s;
+        }
+        #theme-toggle-btn i { font-size: 18px; color: var(--text-muted); }
+        #theme-toggle-btn:hover i { color: var(--red); }
+        .nav-avatar {
+            width: 36px; height: 36px; border-radius: 50%;
+            background: linear-gradient(135deg, #8b0000, #c0392b);
+            color: white; font-size: 14px; font-weight: 800;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; border: 2px solid var(--border-color);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .nav-avatar:hover { transform: scale(1.1); box-shadow: 0 3px 12px rgba(139,0,0,0.3); }
+
+        /* ===== PAGE HEADER ===== */
+        .page-header {
+            background: linear-gradient(135deg, #6b0000 0%, #8b0000 50%, #b91c1c 100%);
+            padding: 40px 0 50px;
+            position: relative; overflow: hidden;
+        }
+        .page-header::before {
+            content: '';
+            position: absolute; width: 350px; height: 350px; border-radius: 50%;
+            border: 60px solid rgba(255,255,255,0.05);
+            top: -120px; right: -80px; pointer-events: none;
+        }
+        .page-header::after {
+            content: '';
+            position: absolute; width: 200px; height: 200px; border-radius: 50%;
+            border: 40px solid rgba(255,255,255,0.04);
+            bottom: -60px; left: 60px; pointer-events: none;
+        }
+        .page-header-inner {
+            max-width: 1200px; margin: 0 auto; padding: 0 50px;
+            position: relative; z-index: 1;
+        }
+        .page-badge {
+            display: inline-flex; align-items: center; gap: 7px;
+            background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 50px; padding: 5px 14px;
+            font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.9);
+            letter-spacing: 1px; text-transform: uppercase; margin-bottom: 14px;
+        }
+        .page-title {
+            font-size: 42px; font-weight: 900; color: white;
+            letter-spacing: -1.5px; line-height: 1; margin-bottom: 8px;
+        }
+        .page-subtitle {
+            font-size: 14px; color: rgba(255,255,255,0.7); font-weight: 600;
+            margin-bottom: 28px;
+        }
+
+        /* Stats row */
+        .header-stats {
+            display: flex; gap: 24px; flex-wrap: wrap;
+        }
+        .hstat {
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 12px; padding: 12px 18px;
+            display: flex; align-items: center; gap: 10px;
+            color: white;
+        }
+        .hstat i { font-size: 18px; opacity: 0.8; }
+        .hstat-num { font-size: 22px; font-weight: 900; line-height: 1; }
+        .hstat-label { font-size: 11px; opacity: 0.7; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* ===== MAIN LAYOUT ===== */
+        .main-wrap {
+            max-width: 1200px; margin: 0 auto;
+            padding: 40px 50px;
+            display: grid; grid-template-columns: 1fr 340px; gap: 30px;
+            align-items: start;
+        }
+
+        /* ===== FILTER / SORT BAR ===== */
+        .feed-controls {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 20px; flex-wrap: wrap; gap: 10px;
+        }
+        .filter-pills { display: flex; gap: 7px; flex-wrap: wrap; }
+        .pill {
+            padding: 6px 16px; border-radius: 50px;
+            font-size: 12px; font-weight: 700; cursor: pointer;
+            border: 1.5px solid var(--border-color);
+            background: var(--bg-nav-card); color: var(--text-muted);
+            font-family: 'Inter', sans-serif; transition: all 0.2s;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .pill:hover { border-color: var(--red); color: var(--red); }
+        .pill.active { background: var(--red); color: white; border-color: var(--red); }
+        .pill .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+
+        .sort-select {
+            background: var(--bg-nav-card); border: 1.5px solid var(--border-color);
+            border-radius: 50px; padding: 6px 14px; font-size: 12px; font-weight: 700;
+            color: var(--text-muted); font-family: 'Inter', sans-serif; cursor: pointer; outline: none;
+            transition: border-color 0.2s;
+        }
+        .sort-select:focus { border-color: var(--red); }
+
+        /* ===== CONCERN FEED ===== */
+        .concern-feed { display: flex; flex-direction: column; gap: 20px; }
+
+        .concern-post {
+            background: var(--bg-nav-card); border-radius: 18px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+            transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+            animation: postIn 0.4s ease both;
+        }
+        .concern-post:nth-child(2) { animation-delay: 0.08s; }
+        .concern-post:nth-child(3) { animation-delay: 0.14s; }
+        .concern-post:nth-child(4) { animation-delay: 0.20s; }
+        .concern-post:nth-child(5) { animation-delay: 0.26s; }
+        @keyframes postIn {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .concern-post:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 28px rgba(0,0,0,0.09);
+            border-color: rgba(139,0,0,0.2);
+        }
+
+        /* Post header */
+        .post-header {
+            display: flex; align-items: center; gap: 12px;
+            padding: 16px 18px 12px;
+        }
+        .post-avatar {
+            width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+            background: linear-gradient(135deg, #8b0000, #c0392b);
+            color: white; font-size: 15px; font-weight: 800;
+            display: flex; align-items: center; justify-content: center;
+            border: 2px solid var(--border-color);
+        }
+        .post-avatar.anon {
+            background: linear-gradient(135deg, #607d8b, #90a4ae);
+        }
+        .post-user { flex: 1; min-width: 0; }
+        .post-username { font-size: 14px; font-weight: 700; color: var(--text-main); }
+        .post-time { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+        .post-category {
+            font-size: 11px; font-weight: 700; padding: 4px 11px; border-radius: 50px;
+            letter-spacing: 0.5px; text-transform: uppercase; flex-shrink: 0;
+        }
+        .cat-road     { background: #fef3c7; color: #92400e; }
+        .cat-sanit    { background: #d1fae5; color: #065f46; }
+        .cat-safety   { background: #fee2e2; color: #991b1b; }
+        .cat-flood    { background: #dbeafe; color: #1e40af; }
+        .cat-light    { background: #fef9c3; color: #854d0e; }
+        .cat-other    { background: var(--search-bg); color: var(--text-muted); }
+
+        body.dark-mode .cat-road  { background: #451a03; color: #fcd34d; }
+        body.dark-mode .cat-sanit { background: #052e16; color: #6ee7b7; }
+        body.dark-mode .cat-safety{ background: #450a0a; color: #fca5a5; }
+        body.dark-mode .cat-flood { background: #172554; color: #93c5fd; }
+        body.dark-mode .cat-light { background: #422006; color: #fde68a; }
+
+        /* Post image */
+        .post-img-wrap { position: relative; width: 100%; height: 240px; overflow: hidden; }
+        .post-img-wrap img {
+            width: 100%; height: 100%; object-fit: cover; display: block;
+            transition: transform 0.4s ease;
+        }
+        .concern-post:hover .post-img-wrap img { transform: scale(1.03); }
+        .post-img-placeholder {
+            width: 100%; height: 100%;
+            background: linear-gradient(135deg, #607d8b, #90a4ae);
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; color: white; gap: 8px; font-size: 13px; font-weight: 700;
+        }
+        .post-img-placeholder i { font-size: 32px; opacity: 0.7; }
+        .status-overlay {
+            position: absolute; top: 12px; left: 12px;
+            font-size: 11px; font-weight: 800; letter-spacing: 1px;
+            padding: 5px 12px; border-radius: 50px; text-transform: uppercase;
+        }
+        .status-pending  { background: #fbbf24; color: #1c1917; }
+        .status-progress { background: #3b82f6; color: white; }
+        .status-resolved { background: #22c55e; color: white; }
+
+        /* Post body */
+        .post-body { padding: 14px 18px; }
+        .post-caption {
+            font-size: 14px; line-height: 1.65; color: var(--text-main);
+            margin-bottom: 12px;
+        }
+        .post-location {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 13px; color: var(--text-muted); font-weight: 600;
+        }
+        .post-location i { color: var(--red); font-size: 12px; }
+
+        /* Post footer */
+        .post-footer {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 18px 14px;
+            border-top: 1px solid var(--border-color);
+        }
+        .post-actions { display: flex; gap: 4px; }
+        .action-btn {
+            display: flex; align-items: center; gap: 6px;
+            padding: 7px 13px; border-radius: 50px;
+            font-size: 13px; font-weight: 700; cursor: pointer;
+            border: none; font-family: 'Inter', sans-serif;
+            background: transparent; color: var(--text-muted);
+            transition: all 0.2s;
+        }
+        .action-btn:hover { background: var(--search-bg); color: var(--text-main); }
+        .action-btn.liked { color: #dc2626; }
+        .action-btn.liked i { animation: heartPop 0.3s ease; }
+        @keyframes heartPop {
+            0%   { transform: scale(1); }
+            50%  { transform: scale(1.4); }
+            100% { transform: scale(1); }
+        }
+        .action-btn i { font-size: 14px; }
+
+        .upvote-count { font-size: 13px; font-weight: 700; color: var(--text-muted); }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar { display: flex; flex-direction: column; gap: 20px; position: sticky; top: 80px; }
+
+        .sidebar-card {
+            background: var(--bg-nav-card); border-radius: 18px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        }
+        .sidebar-card-header {
+            padding: 16px 18px 14px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .sidebar-card-title {
+            font-size: 13px; font-weight: 800; color: var(--text-main);
+            text-transform: uppercase; letter-spacing: 0.8px;
+        }
+        .sidebar-card-body { padding: 14px 18px; }
+
+        /* Quick submit card */
+        .quick-submit {
+            background: linear-gradient(135deg, #6b0000, #8b0000);
+            border-radius: 18px; padding: 22px 20px;
+            color: white; border: none;
+        }
+        .qs-title { font-size: 16px; font-weight: 900; margin-bottom: 6px; }
+        .qs-sub { font-size: 13px; opacity: 0.75; line-height: 1.5; margin-bottom: 18px; }
+        .qs-btn {
+            width: 100%; padding: 11px; border-radius: 50px;
+            background: white; color: #8b0000;
+            border: none; font-size: 14px; font-weight: 800;
+            cursor: pointer; font-family: 'Inter', sans-serif;
+            display: flex; align-items: center; justify-content: center; gap: 7px;
+            transition: all 0.2s;
+        }
+        .qs-btn:hover { background: #f1f3f4; transform: translateY(-1px); }
+
+        /* Category breakdown */
+        .cat-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 9px 0; border-bottom: 1px solid var(--border-color);
+        }
+        .cat-row:last-child { border-bottom: none; padding-bottom: 0; }
+        .cat-info { display: flex; align-items: center; gap: 10px; }
+        .cat-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .cat-name { font-size: 13px; font-weight: 600; color: var(--text-main); }
+        .cat-bar-wrap { flex: 1; height: 5px; background: var(--border-color); border-radius: 3px; margin: 0 12px; }
+        .cat-bar { height: 100%; border-radius: 3px; }
+        .cat-num { font-size: 12px; font-weight: 700; color: var(--text-muted); }
+
+        /* Top contributors */
+        .contributor-row {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 0; border-bottom: 1px solid var(--border-color);
+        }
+        .contributor-row:last-child { border-bottom: none; padding-bottom: 0; }
+        .contrib-avatar {
+            width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+            background: linear-gradient(135deg, #8b0000, #c0392b);
+            color: white; font-size: 13px; font-weight: 800;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .contrib-name { font-size: 13px; font-weight: 700; color: var(--text-main); flex: 1; }
+        .contrib-count {
+            font-size: 11px; font-weight: 700; background: var(--search-bg);
+            color: var(--text-muted); padding: 3px 9px; border-radius: 50px;
+        }
+
+        /* ===== FAB ===== */
+        .fab {
+            position: fixed; bottom: 32px; right: 32px;
+            width: 58px; height: 58px; border-radius: 50%;
+            background: linear-gradient(135deg, #8b0000, #c0392b);
+            color: white; font-size: 22px;
+            border: none; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 6px 24px rgba(139,0,0,0.4);
+            transition: transform 0.25s, box-shadow 0.25s;
+            z-index: 200;
+        }
+        .fab:hover { transform: scale(1.1) rotate(90deg); box-shadow: 0 10px 30px rgba(139,0,0,0.5); }
+
+        /* ===== MODAL ===== */
+        .modal-backdrop {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.55); z-index: 500;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+            display: flex; align-items: center; justify-content: center; padding: 20px;
+        }
+        .modal-backdrop.open { opacity: 1; visibility: visible; }
+        .modal {
+            background: var(--bg-nav-card); border-radius: 20px;
+            max-width: 520px; width: 100%; max-height: 90vh; overflow-y: auto;
+            transform: scale(0.93) translateY(20px);
+            transition: transform 0.32s cubic-bezier(0.34,1.3,0.64,1);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+        .modal-backdrop.open .modal { transform: scale(1) translateY(0); }
+        .modal-header {
+            padding: 20px 22px 15px;
+            display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky; top: 0; background: var(--bg-nav-card); z-index: 1;
+        }
+        .modal-title { font-size: 18px; font-weight: 800; color: var(--text-main); }
+        .modal-close {
+            background: var(--search-bg); border: none; cursor: pointer;
+            width: 34px; height: 34px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text-muted); font-size: 15px; transition: background 0.2s, color 0.2s;
+        }
+        .modal-close:hover { background: var(--red); color: white; }
+        .modal-body { padding: 20px 22px 24px; }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 700; color: var(--text-main); margin-bottom: 7px; }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%; padding: 10px 14px;
+            border: 1.5px solid var(--border-color); border-radius: 11px;
+            font-size: 14px; background: var(--bg-main); color: var(--text-main);
+            font-family: 'Inter', sans-serif; outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            -webkit-appearance: none; appearance: none;
+        }
+        .form-group select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%235f6368' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus { border-color: var(--red); box-shadow: 0 0 0 3px var(--red-light); }
+        .form-group textarea { resize: vertical; min-height: 100px; }
+
+        /* Photo upload zone */
+        .upload-zone {
+            border: 2px dashed var(--border-color); border-radius: 12px;
+            padding: 28px; text-align: center; cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .upload-zone:hover { border-color: var(--red); background: var(--red-light); }
+        .upload-zone i { font-size: 28px; color: var(--text-muted); margin-bottom: 8px; display: block; }
+        .upload-zone p { font-size: 13px; color: var(--text-muted); font-weight: 600; margin: 0; }
+        .upload-zone span { font-size: 12px; color: var(--text-muted); opacity: 0.7; }
+        .upload-zone input { display: none; }
+
+        .anon-toggle {
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px 14px; border-radius: 11px;
+            background: var(--search-bg); cursor: pointer;
+            font-size: 13px; font-weight: 600; color: var(--text-muted);
+            user-select: none;
+        }
+        .anon-toggle input { display: none; }
+        .toggle-track {
+            width: 36px; height: 20px; border-radius: 10px;
+            background: var(--border-color); position: relative;
+            transition: background 0.2s; flex-shrink: 0;
+        }
+        .toggle-track::after {
+            content: ''; position: absolute; top: 3px; left: 3px;
+            width: 14px; height: 14px; border-radius: 50%; background: white;
+            transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .anon-toggle input:checked ~ .toggle-track { background: var(--red); }
+        .anon-toggle input:checked ~ .toggle-track::after { transform: translateX(16px); }
+
+        .submit-btn {
+            width: 100%; padding: 13px; background: var(--red); color: white;
+            border: none; border-radius: 50px; font-size: 15px; font-weight: 700;
+            cursor: pointer; font-family: 'Inter', sans-serif;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: background 0.2s, transform 0.2s;
+            box-shadow: 0 4px 14px rgba(139,0,0,0.25); margin-top: 6px;
+        }
+        .submit-btn:hover { background: var(--red-hover); transform: translateY(-1px); }
+
+        /* ===== TOAST ===== */
+        .toast-container {
+            position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+            z-index: 9998; display: flex; flex-direction: column; align-items: center; gap: 8px;
+            pointer-events: none;
+        }
+        .toast {
+            background-color: #1e1e1e; color: #fff;
+            padding: 11px 22px; border-radius: 50px;
+            font-size: 14px; font-weight: 600;
+            display: flex; align-items: center; gap: 9px;
+            opacity: 0; transform: translateY(18px);
+            transition: all 0.35s cubic-bezier(0.34,1.5,0.64,1);
+            pointer-events: auto; white-space: nowrap;
+        }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .toast.success i { color: #22c55e; }
+        .toast.info i { color: #60a5fa; }
+        .toast.error i { color: #f87171; }
+
+        /* ===== LOAD MORE ===== */
+        .load-more-wrap { display: flex; justify-content: center; margin-top: 6px; }
+        .load-more-btn {
+            background: transparent; color: var(--red); border: 2px solid var(--red);
+            border-radius: 50px; padding: 10px 28px; font-size: 14px; font-weight: 700;
+            cursor: pointer; font-family: 'Inter', sans-serif;
+            display: flex; align-items: center; gap: 8px; transition: all 0.2s;
+        }
+        .load-more-btn:hover { background: var(--red); color: white; }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 900px) {
+            .main-wrap { grid-template-columns: 1fr; padding: 24px 20px; }
+            .sidebar { position: static; }
+            .page-header-inner { padding: 0 20px; }
+            .top-nav { padding: 12px 16px; }
+            .nav-search { display: none; }
+            .breadcrumb { display: none; }
+            .page-title { font-size: 30px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== TOAST ===== -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- ===== SUBMIT MODAL ===== -->
+<div class="modal-backdrop" id="submit-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">Submit a Concern</div>
+            <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Category</label>
+                <select id="f-category">
+                    <option value="">Select category...</option>
+                    <option value="Road">Road / Infrastructure</option>
+                    <option value="Sanitation">Garbage / Sanitation</option>
+                    <option value="Flooding">Flooding / Drainage</option>
+                    <option value="Lighting">Street Lighting</option>
+                    <option value="Safety">Public Safety</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Location / Purok</label>
+                <input type="text" id="f-location" placeholder="e.g. Purok 3, Picaleon">
+            </div>
+            <div class="form-group">
+                <label>Describe the Concern</label>
+                <textarea id="f-desc" placeholder="Be specific — what's the issue, how long has it been there, how does it affect residents?"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Attach Photo</label>
+                <label class="upload-zone">
+                    <input type="file" accept="image/*" onchange="previewFile(this)">
+                    <i class="fas fa-camera" id="upload-icon"></i>
+                    <p id="upload-text">Click to upload a photo</p>
+                    <span>JPG, PNG up to 10MB</span>
+                </label>
+            </div>
+            <label class="anon-toggle" onclick="toggleAnon(this)">
+                <input type="checkbox" id="anon-check">
+                <div class="toggle-track"></div>
+                Post anonymously
+            </label>
+            <button class="submit-btn" onclick="submitPost()">
+                <i class="fas fa-paper-plane"></i> Post Concern
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== TOP NAV ===== -->
+<nav class="top-nav">
+    <div class="nav-left">
+        <a href="index.html" class="nav-logo">ActBayan<span>.</span></a>
+        <div class="breadcrumb">
+            <a href="index.html"><i class="fas fa-home" style="font-size:11px;"></i></a>
+            <span style="font-size:9px;"><i class="fas fa-chevron-right"></i></span>
+            <span class="current">Concerns</span>
+        </div>
+    </div>
+    <div class="nav-search">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Search concerns..." id="search-input" oninput="filterPosts(this.value)">
+    </div>
+    <div class="nav-icons">
+        <div id="theme-toggle-btn" title="Toggle Dark Mode">
+            <i class="fas fa-moon" id="theme-icon"></i>
+        </div>
+        <a href="index.html" class="nav-icon-btn" title="Home">
+            <i class="fas fa-home"></i>
+        </a>
+        <div class="nav-icon-btn" title="Notifications" onclick="showToast('No new notifications', 'info')">
+            <i class="fas fa-bell"></i>
+            <span class="notif-badge">5</span>
+        </div>
+        <div class="nav-icon-btn" title="Settings" onclick="showToast('Settings coming soon', 'info')">
+            <i class="fas fa-cog"></i>
+        </div>
+        <div class="nav-avatar" id="nav-avatar" title="My Profile" onclick="showToast('Profile page coming soon', 'info')">U</div>
+    </div>
+</nav>
+
+<!-- ===== PAGE HEADER ===== -->
+<div class="page-header">
+    <div class="page-header-inner">
+        <div class="page-badge"><i class="fas fa-heart"></i> ActBayan Cares</div>
+        <div class="page-title">CONCERNS</div>
+        <div class="page-subtitle">Concern Wall of Barangay Picaleon — Your voice shapes the community</div>
+
+    </div>
+</div>
+
+<!-- ===== MAIN ===== -->
+<div class="main-wrap">
+
+    <!-- FEED -->
+    <div>
+        <div class="feed-controls">
+            <div class="filter-pills">
+                <button class="pill active" onclick="setFilter('all', this)"><span class="dot"></span> All</button>
+                <button class="pill" onclick="setFilter('Road', this)"><i class="fas fa-road" style="font-size:10px;"></i> Road</button>
+                <button class="pill" onclick="setFilter('Sanitation', this)"><i class="fas fa-trash" style="font-size:10px;"></i> Sanitation</button>
+                <button class="pill" onclick="setFilter('Flooding', this)"><i class="fas fa-water" style="font-size:10px;"></i> Flooding</button>
+                <button class="pill" onclick="setFilter('Safety', this)"><i class="fas fa-shield-alt" style="font-size:10px;"></i> Safety</button>
+                <button class="pill" onclick="setFilter('Lighting', this)"><i class="fas fa-lightbulb" style="font-size:10px;"></i> Lighting</button>
+            </div>
+            <select class="sort-select" onchange="sortPosts(this.value)">
+                <option value="recent">Most Recent</option>
+                <option value="upvotes">Most Upvoted</option>
+                <option value="pending">Pending First</option>
+            </select>
+        </div>
+
+        <div class="concern-feed" id="concern-feed">
+            <!-- Posts injected by JS -->
+        </div>
+
+        <div class="load-more-wrap" style="margin-top:24px;">
+            <button class="load-more-btn" onclick="loadMore()">
+                <i class="fas fa-chevron-down"></i> Load More Concerns
+            </button>
+        </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+
+        <!-- Quick Submit -->
+        <div class="quick-submit">
+            <div class="qs-title">See something wrong?</div>
+            <p class="qs-sub">Report infrastructure issues, sanitation problems, safety hazards, and more. Your report matters.</p>
+            <button class="qs-btn" onclick="openModal()">
+                <i class="fas fa-plus"></i> Submit a Concern
+            </button>
+        </div>
+
+        <!-- Category Breakdown -->
+        <div class="sidebar-card">
+            <div class="sidebar-card-header">
+                <div class="sidebar-card-title">By Category</div>
+            </div>
+            <div class="sidebar-card-body">
+                <div class="cat-row">
+                    <div class="cat-info">
+                        <div class="cat-dot" style="background:#f59e0b;"></div>
+                        <span class="cat-name">Road</span>
+                    </div>
+                    <div class="cat-bar-wrap"><div class="cat-bar" style="width:72%; background:#f59e0b;"></div></div>
+                    <span class="cat-num">89</span>
+                </div>
+                <div class="cat-row">
+                    <div class="cat-info">
+                        <div class="cat-dot" style="background:#10b981;"></div>
+                        <span class="cat-name">Sanitation</span>
+                    </div>
+                    <div class="cat-bar-wrap"><div class="cat-bar" style="width:55%; background:#10b981;"></div></div>
+                    <span class="cat-num">67</span>
+                </div>
+                <div class="cat-row">
+                    <div class="cat-info">
+                        <div class="cat-dot" style="background:#3b82f6;"></div>
+                        <span class="cat-name">Flooding</span>
+                    </div>
+                    <div class="cat-bar-wrap"><div class="cat-bar" style="width:38%; background:#3b82f6;"></div></div>
+                    <span class="cat-num">47</span>
+                </div>
+                <div class="cat-row">
+                    <div class="cat-info">
+                        <div class="cat-dot" style="background:#ef4444;"></div>
+                        <span class="cat-name">Safety</span>
+                    </div>
+                    <div class="cat-bar-wrap"><div class="cat-bar" style="width:24%; background:#ef4444;"></div></div>
+                    <span class="cat-num">29</span>
+                </div>
+                <div class="cat-row">
+                    <div class="cat-info">
+                        <div class="cat-dot" style="background:#eab308;"></div>
+                        <span class="cat-name">Lighting</span>
+                    </div>
+                    <div class="cat-bar-wrap"><div class="cat-bar" style="width:12%; background:#eab308;"></div></div>
+                    <span class="cat-num">15</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Contributors -->
+        <div class="sidebar-card">
+            <div class="sidebar-card-header">
+                <div class="sidebar-card-title">Top Contributors</div>
+            </div>
+            <div class="sidebar-card-body">
+                <div class="contributor-row">
+                    <div class="contrib-avatar">M</div>
+                    <span class="contrib-name">Maria Santos</span>
+                    <span class="contrib-count">12 posts</span>
+                </div>
+                <div class="contributor-row">
+                    <div class="contrib-avatar" style="background:linear-gradient(135deg,#1e40af,#3b82f6);">J</div>
+                    <span class="contrib-name">Jose Reyes</span>
+                    <span class="contrib-count">9 posts</span>
+                </div>
+                <div class="contributor-row">
+                    <div class="contrib-avatar" style="background:linear-gradient(135deg,#065f46,#10b981);">A</div>
+                    <span class="contrib-name">Ana Cruz</span>
+                    <span class="contrib-count">7 posts</span>
+                </div>
+                <div class="contributor-row">
+                    <div class="contrib-avatar" style="background:linear-gradient(135deg,#78350f,#f59e0b);">R</div>
+                    <span class="contrib-name">Roberto Lim</span>
+                    <span class="contrib-count">6 posts</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resolution Rate -->
+        <div class="sidebar-card">
+            <div class="sidebar-card-header">
+                <div class="sidebar-card-title">Resolution Rate</div>
+            </div>
+            <div class="sidebar-card-body">
+                <div style="text-align:center; padding:8px 0;">
+                    <div style="font-size:42px; font-weight:900; color:var(--red); letter-spacing:-2px;">74%</div>
+                    <div style="font-size:13px; color:var(--text-muted); font-weight:600; margin-top:2px;">of concerns resolved this month</div>
+                    <div style="height:8px; background:var(--border-color); border-radius:4px; margin-top:14px; overflow:hidden;">
+                        <div style="width:74%; height:100%; background:linear-gradient(90deg,#8b0000,#c0392b); border-radius:4px;"></div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-top:6px; font-size:11px; color:var(--text-muted); font-weight:600;">
+                        <span>0%</span><span>100%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ===== FAB ===== -->
+<button class="fab" onclick="openModal()" title="Submit a Concern">
+    <i class="fas fa-plus"></i>
+</button>
+
+<script>
+    // ===== DARK MODE =====
+    const themeBtn = document.getElementById('theme-toggle-btn');
+    const themeIcon = document.getElementById('theme-icon');
+    if (localStorage.getItem('theme') === 'dark') {
+        document.body.classList.add('dark-mode');
+        themeIcon.classList.replace('fa-moon', 'fa-sun');
+    }
+    themeBtn.addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        const isDark = document.body.classList.contains('dark-mode');
+        themeIcon.classList.replace(isDark ? 'fa-moon' : 'fa-sun', isDark ? 'fa-sun' : 'fa-moon');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    });
+
+    // ===== DYNAMIC USER =====
+    (function() {
+        const user = sessionStorage.getItem('actbayan_user') || 'User';
+        const nav = document.getElementById('nav-avatar');
+        if (nav) nav.textContent = user.charAt(0).toUpperCase();
+    })();
+
+    // ===== TOAST =====
+    function showToast(msg, type = 'info') {
+        const icons = { success: 'fa-check-circle', info: 'fa-info-circle', error: 'fa-exclamation-circle' };
+        const container = document.getElementById('toast-container');
+        const t = document.createElement('div');
+        t.className = 'toast ' + type;
+        t.innerHTML = '<i class="fas ' + (icons[type] || 'fa-info-circle') + '"></i> ' + msg;
+        container.appendChild(t);
+        requestAnimationFrame(() => requestAnimationFrame(() => t.classList.add('show')));
+        setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 3200);
+    }
+
+    // ===== MODAL =====
+    function openModal() {
+        document.getElementById('submit-modal').classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeModal() {
+        document.getElementById('submit-modal').classList.remove('open');
+        document.body.style.overflow = '';
+    }
+    document.getElementById('submit-modal').addEventListener('click', e => {
+        if (e.target === document.getElementById('submit-modal')) closeModal();
+    });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+    // ===== POSTS DATA =====
+    const allPosts = [
+        {
+            id: 1, user: 'Maria Santos', initials: 'M', anon: false,
+            category: 'Road', catClass: 'cat-road',
+            caption: 'The road along Purok 3 near the elementary school has several deep potholes that are dangerous especially during rainy season. Several motorcycles have already had accidents here.',
+            location: 'Purok 3, Picaleon', time: '2 hours ago',
+            status: 'pending', upvotes: 34, comments: 8,
+            img: null, imgIcon: 'fa-road', imgColor: '#607d8b,#90a4ae'
+        },
+        {
+            id: 2, user: 'Anonymous', initials: '?', anon: true,
+            category: 'Sanitation', catClass: 'cat-sanit',
+            caption: 'Garbage has been piling up along the drainage canal near the market area for over two weeks now. The smell is unbearable and it is attracting rats and flies. This is a serious health hazard for nearby residents.',
+            location: 'Market Area, Purok 1', time: '5 hours ago',
+            status: 'progress', upvotes: 51, comments: 14,
+            img: null, imgIcon: 'fa-trash-alt', imgColor: '#388e3c,#66bb6a'
+        },
+        {
+            id: 3, user: 'Jose Reyes', initials: 'J', anon: false,
+            category: 'Flooding', catClass: 'cat-flood',
+            caption: 'The drainage along Purok 5 is clogged and causes flooding every time it rains. Water reaches knee level and enters some houses. This has been an issue for 3 years already.',
+            location: 'Purok 5, Picaleon', time: 'Yesterday',
+            status: 'pending', upvotes: 78, comments: 22,
+            img: null, imgIcon: 'fa-water', imgColor: '#1565c0,#42a5f5'
+        },
+        {
+            id: 4, user: 'Ana Cruz', initials: 'A', anon: false,
+            category: 'Road', catClass: 'cat-road',
+            caption: 'Road concreting on Picaleon Main Road from Purok 4 to Purok 6 has been completed. The road is now smooth and safe. Thank you to the local government for acting fast on this concern!',
+            location: 'Purok 4–6, Picaleon Main Road', time: 'Mar 10, 2026',
+            status: 'resolved', upvotes: 112, comments: 31,
+            img: null, imgIcon: 'fa-road', imgColor: '#4a148c,#7b1fa2'
+        },
+        {
+            id: 5, user: 'Roberto Lim', initials: 'R', anon: false,
+            category: 'Lighting', catClass: 'cat-light',
+            caption: 'Three streetlights at the junction of Purok 2 and the barangay road have been broken for a month. The area is very dark at night and residents are afraid to walk there.',
+            location: 'Purok 2 Junction, Picaleon', time: 'Mar 12, 2026',
+            status: 'progress', upvotes: 29, comments: 6,
+            img: null, imgIcon: 'fa-lightbulb', imgColor: '#e65100,#ff8f00'
+        },
+        {
+            id: 6, user: 'Anonymous', initials: '?', anon: true,
+            category: 'Safety', catClass: 'cat-safety',
+            caption: 'There are loose electrical wires hanging low near the covered court in Purok 6. Children play there everyday and it is very dangerous. MERALCO has been informed but no action yet.',
+            location: 'Covered Court, Purok 6', time: 'Mar 14, 2026',
+            status: 'pending', upvotes: 43, comments: 17,
+            img: null, imgIcon: 'fa-bolt', imgColor: '#b71c1c,#e53935'
+        }
+    ];
+
+    let currentFilter = 'all';
+    let likedPosts = new Set();
+
+    function getStatusClass(s) {
+        return s === 'pending' ? 'status-pending' : s === 'progress' ? 'status-progress' : 'status-resolved';
+    }
+    function getStatusLabel(s) {
+        return s === 'pending' ? 'Pending' : s === 'progress' ? 'In Progress' : 'Resolved';
+    }
+    function getAvatarStyle(p) {
+        if (p.anon) return 'background:linear-gradient(135deg,#607d8b,#90a4ae);';
+        const colors = ['linear-gradient(135deg,#8b0000,#c0392b)', 'linear-gradient(135deg,#1e40af,#3b82f6)', 'linear-gradient(135deg,#065f46,#10b981)', 'linear-gradient(135deg,#78350f,#f59e0b)', 'linear-gradient(135deg,#4a148c,#7b1fa2)'];
+        return 'background:' + colors[p.id % colors.length] + ';';
+    }
+
+    function renderPosts(posts) {
+        const feed = document.getElementById('concern-feed');
+        if (posts.length === 0) {
+            feed.innerHTML = '<div style="text-align:center;padding:60px 20px;color:var(--text-muted);"><i class="fas fa-search" style="font-size:36px;margin-bottom:12px;display:block;opacity:0.3;"></i><p style="font-weight:700;font-size:15px;margin-bottom:4px;">No concerns found</p><p style="font-size:13px;">Try a different filter or search term.</p></div>';
+            return;
+        }
+        feed.innerHTML = posts.map(p => `
+            <div class="concern-post" data-id="${p.id}" data-category="${p.category}">
+                <div class="post-header">
+                    <div class="post-avatar ${p.anon ? 'anon' : ''}" style="${getAvatarStyle(p)}">${p.initials}</div>
+                    <div class="post-user">
+                        <div class="post-username">${p.user}</div>
+                        <div class="post-time"><i class="fas fa-clock" style="font-size:10px;margin-right:3px;"></i>${p.time}</div>
+                    </div>
+                    <span class="post-category ${p.catClass}">${p.category}</span>
+                </div>
+                <div class="post-img-wrap">
+                    <div class="post-img-placeholder" style="background:linear-gradient(135deg,${p.imgColor});">
+                        <i class="fas ${p.imgIcon}"></i>
+                        <span style="font-size:12px;opacity:0.8;">No photo attached</span>
+                    </div>
+                    <span class="status-overlay ${getStatusClass(p.status)}">${getStatusLabel(p.status)}</span>
+                </div>
+                <div class="post-body">
+                    <p class="post-caption">${p.caption}</p>
+                    <div class="post-location"><i class="fas fa-map-marker-alt"></i> ${p.location}</div>
+                </div>
+                <div class="post-footer">
+                    <div class="post-actions">
+                        <button class="action-btn ${likedPosts.has(p.id) ? 'liked' : ''}" onclick="toggleLike(${p.id}, this)">
+                            <i class="fas fa-arrow-up"></i>
+                            <span class="upvote-count">${p.upvotes + (likedPosts.has(p.id) ? 1 : 0)}</span>
+                        </button>
+                        <button class="action-btn" onclick="showToast('Comments coming soon', 'info')">
+                            <i class="fas fa-comment"></i> ${p.comments}
+                        </button>
+                        <button class="action-btn" onclick="sharePost(${p.id})">
+                            <i class="fas fa-share-alt"></i>
+                        </button>
+                    </div>
+                    <button class="action-btn" onclick="showToast('Full detail view coming soon', 'info')" style="font-size:12px;color:var(--red);font-weight:700;">
+                        View Details <i class="fas fa-arrow-right" style="font-size:11px;"></i>
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function toggleLike(id, btn) {
+        const post = allPosts.find(p => p.id === id);
+        if (!post) return;
+        if (likedPosts.has(id)) {
+            likedPosts.delete(id);
+            btn.classList.remove('liked');
+            btn.querySelector('.upvote-count').textContent = post.upvotes;
+            showToast('Upvote removed', 'info');
+        } else {
+            likedPosts.add(id);
+            btn.classList.add('liked');
+            btn.querySelector('.upvote-count').textContent = post.upvotes + 1;
+            showToast('Concern upvoted! 👍', 'success');
+        }
+    }
+
+    function sharePost(id) {
+        const post = allPosts.find(p => p.id === id);
+        if (navigator.share) {
+            navigator.share({ title: 'ActBayan Concern', text: post.caption, url: window.location.href });
+        } else {
+            showToast('Link copied to clipboard!', 'success');
+        }
+    }
+
+    function setFilter(cat, btn) {
+        document.querySelectorAll('.pill').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = cat;
+        applyFilter();
+    }
+
+    function applyFilter() {
+        const filtered = currentFilter === 'all' ? allPosts : allPosts.filter(p => p.category === currentFilter);
+        renderPosts(filtered);
+    }
+
+    function sortPosts(val) {
+        const sorted = [...allPosts];
+        if (val === 'upvotes') sorted.sort((a, b) => b.upvotes - a.upvotes);
+        else if (val === 'pending') sorted.sort((a, b) => (a.status === 'pending' ? -1 : 1));
+        showToast('Sorted by ' + val, 'info');
+        const filtered = currentFilter === 'all' ? sorted : sorted.filter(p => p.category === currentFilter);
+        renderPosts(filtered);
+    }
+
+    function filterPosts(q) {
+        const term = q.toLowerCase();
+        const filtered = allPosts.filter(p =>
+            p.caption.toLowerCase().includes(term) ||
+            p.location.toLowerCase().includes(term) ||
+            p.category.toLowerCase().includes(term)
+        );
+        renderPosts(filtered);
+    }
+
+    function loadMore() {
+        showToast('Loading more concerns...', 'info');
+    }
+
+    // ===== SUBMIT =====
+    function previewFile(input) {
+        if (input.files && input.files[0]) {
+            document.getElementById('upload-text').textContent = input.files[0].name;
+            document.getElementById('upload-icon').className = 'fas fa-check-circle';
+            document.getElementById('upload-icon').style.color = '#22c55e';
+        }
+    }
+
+    function toggleAnon(label) {
+        const cb = label.querySelector('input');
+        cb.checked = !cb.checked;
+    }
+
+    function submitPost() {
+        const cat = document.getElementById('f-category').value;
+        const loc = document.getElementById('f-location').value.trim();
+        const desc = document.getElementById('f-desc').value.trim();
+        const anon = document.getElementById('anon-check').checked;
+        const user = sessionStorage.getItem('actbayan_user') || 'User';
+
+        if (!cat || !loc || !desc) { showToast('Please fill in all required fields.', 'error'); return; }
+
+        const newPost = {
+            id: allPosts.length + 1,
+            user: anon ? 'Anonymous' : (user.charAt(0).toUpperCase() + user.slice(1)),
+            initials: anon ? '?' : user.charAt(0).toUpperCase(),
+            anon, category: cat, catClass: 'cat-' + cat.toLowerCase().replace('/','').replace(' ',''),
+            caption: desc, location: loc, time: 'Just now',
+            status: 'pending', upvotes: 0, comments: 0,
+            img: null, imgIcon: 'fa-exclamation-circle', imgColor: '#607d8b,#90a4ae'
+        };
+
+        allPosts.unshift(newPost);
+        closeModal();
+        showToast('Concern posted successfully! 🎉', 'success');
+
+        // Reset form
+        document.getElementById('f-category').value = '';
+        document.getElementById('f-location').value = '';
+        document.getElementById('f-desc').value = '';
+        document.getElementById('upload-text').textContent = 'Click to upload a photo';
+        document.getElementById('upload-icon').className = 'fas fa-camera';
+        document.getElementById('upload-icon').style.color = '';
+        document.getElementById('anon-check').checked = false;
+
+        applyFilter();
+    }
+
+    // ===== INIT =====
+    renderPosts(allPosts);
+</script>
+</body>
+</html>
